@@ -40,7 +40,13 @@ async def on_message(message : discord.Message):
     
     
     content = f"{message.guild.name}: De **{message.author.display_name}**.\n{message.content}"
+    # Embeds
+    embeds = message.embeds  # liste d'embeds déjà formatés
 
+    # Fichiers/images
+    files = []
+    for attachment in message.attachments:
+        files.append(await attachment.to_file())
 
     reply_to = None
     if message.reference and message.reference.message_id in message_map:
@@ -51,9 +57,9 @@ async def on_message(message : discord.Message):
             pass
     
     if reply_to:
-        sent = await reply_to.reply(content=content)
+        sent = await reply_to.reply(content=content, embeds=embeds, files=files)
     else:
-        sent = await target_channel.send(content=content)
+        sent = await target_channel.send(content=content, embeds=embeds, files=files)
 
 
 
@@ -62,7 +68,6 @@ async def on_message(message : discord.Message):
 
 
     await bot.process_commands(message)
-
 
 @bot.event
 async def on_reaction_add(reaction : discord.Reaction, user):
@@ -90,23 +95,7 @@ async def on_reaction_add(reaction : discord.Reaction, user):
     
     
 
-    
-    
-
 # Run the bot with your token
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
