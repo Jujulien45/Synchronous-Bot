@@ -73,11 +73,13 @@ async def on_reaction_add(reaction : discord.Reaction, user):
         target_channel = bot.get_channel(CHANEL_ID_2)
     elif reaction.message.channel.id == CHANEL_ID_2:
         target_channel = bot.get_channel(CHANEL_ID_1)
+    else:
+        return
 
     react_to = None
 
-    if reaction.message and reaction.message.id in message_map:
-        mirrored_id = message_map[reaction.message.reference.message_id]
+    if reaction.message.id in message_map:
+        mirrored_id = message_map[reaction.message.id]
         try:
             react_to = await target_channel.fetch_message(mirrored_id)
         except discord.NotFound:
@@ -85,6 +87,9 @@ async def on_reaction_add(reaction : discord.Reaction, user):
 
     if react_to:
         await react_to.add_reaction(reaction.emoji)
+    
+    
+
     
     
 
