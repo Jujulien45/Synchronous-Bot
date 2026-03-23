@@ -63,6 +63,31 @@ async def on_message(message : discord.Message):
 
     await bot.process_commands(message)
 
+
+@bot.event
+async def on_reaction_add(reaction : discord.Reaction, user):
+    if user.bot:
+        return  # Ignore les réactions du bot lui-même
+
+    if reaction.message.channel.id == CHANEL_ID_1:
+        target_channel = bot.get_channel(CHANEL_ID_2)
+    elif reaction.message.channel.id == CHANEL_ID_2:
+        target_channel = bot.get_channel(CHANEL_ID_1)
+
+    react_to = None
+
+    if reaction.message and reaction.message.id in message_map:
+        mirrored_id = message_map[reaction.message.reference.message_id]
+        try:
+            react_to = await target_channel.fetch_message(mirrored_id)
+        except discord.NotFound:
+            pass
+
+    if react_to:
+        await react_to.add_reaction(reaction.emoji)
+    
+    
+
 # Run the bot with your token
 
 
