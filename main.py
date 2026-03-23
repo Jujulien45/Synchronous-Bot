@@ -9,8 +9,8 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-CHANEL_ID_1 = 1485659639948378132
-CHANEL_ID_2 = 1483597279100403873
+CHANEL_ID_1 = 1485674293160448123
+CHANEL_ID_2 = 1485674218732650536
 
 message_map = LRUCache(10_000)
 
