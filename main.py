@@ -24,8 +24,8 @@ active_task = None
 
 # ── Scheduling helpers ────────────────────────────────────────────────────────
 
-def make_task(hour, minute, tz_str, channel_id):
-    tz = pytz.timezone(tz_str)
+def make_task(hour, minute, channel_id):
+    tz = pytz.timezone("Europe/Brussels")
     target = time(hour=hour, minute=minute, tzinfo=tz)
 
     @tasks.loop(time=target)
@@ -44,14 +44,12 @@ def make_task(hour, minute, tz_str, channel_id):
 @app_commands.describe(
     hour="Hour in 24h format (0-23)",
     minute="Minute (0-59)",
-    timezone="Timezone (e.g. Europe/Brussels, America/New_York)",
     channel="Channel to send the message in"
 )
 async def set_schedule(
     interaction: discord.Interaction,
     hour: int,
     minute: int,
-    timezone: str,
     channel: discord.TextChannel
 ):
     global active_task
@@ -62,27 +60,19 @@ async def set_schedule(
     if not (0 <= minute <= 59):
         await interaction.response.send_message("❌ Minute must be between 0 and 59.", ephemeral=True)
         return
-    try:
-        pytz.timezone(timezone)
-    except pytz.UnknownTimeZoneError:
-        await interaction.response.send_message(
-            f"❌ Unknown timezone `{timezone}`. Try something like `Europe/Brussels` or `America/New_York`.",
-            ephemeral=True
-        )
-        return
 
     if active_task and active_task.is_running():
         active_task.cancel()
 
-    active_task = make_task(hour, minute, timezone, channel.id)
+    active_task = make_task(hour, minute, channel.id)
     active_task.start()
 
     schedules[interaction.guild_id] = {
-        "hour": hour, "minute": minute, "tz": timezone, "channel": channel.id
+        "hour": hour, "minute": minute, "channel": channel.id
     }
 
     await interaction.response.send_message(
-        f"✅ Scheduled! I'll send a message in {channel.mention} every day at **{hour:02d}:{minute:02d}** ({timezone})."
+        f"✅ Scheduled! I'll send a message in {channel.mention} every day at **{hour:02d}:{minute:02d}**."
     )
 
 
@@ -95,7 +85,7 @@ async def view_schedule(interaction: discord.Interaction):
 
     channel = bot.get_channel(schedule["channel"])
     await interaction.response.send_message(
-        f"📅 Current schedule: **{schedule['hour']:02d}:{schedule['minute']:02d}** ({schedule['tz']}) in {channel.mention if channel else 'unknown channel'}."
+        f"📅 Current schedule: **{schedule['hour']:02d}:{schedule['minute']:02d}** in {channel.mention if channel else 'unknown channel'}."
     )
 
 
